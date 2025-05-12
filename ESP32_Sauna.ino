@@ -5,12 +5,13 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <ESP32Encoder.h>
+#include <secrets.h>
 
 // Author:  Steven Morrow & Patrick Morrow
 // Date:    05/11/2025
 //
 // TODO:
-//          * Implement smoother timing on the web end, we only poll at 2 second
+//          √ Implement smoother timing on the web end, we only poll at 2 second
 //                intervals so the time jumps by 2 or 3 seconds depending.  Perhaps
 //                get a starting value from the status call and re-sync the countdown
 //                but implement the countdown logic on the web client.
@@ -61,12 +62,7 @@ const int menuLength = 4;
 int menuIndex = 0;
 
 // === WiFi Info ===
-const char* ssid1 = "<SSID1>";
-const char* password1 = "<PWD1";
-
-const char* ssid2 = "<SSID2>";
-const char* password2 = "<PWD2>";
-
+// *Use secrets.h file to define primary and secondary WiFi credentials
 unsigned long wifiTimeout = 20000; // 20 seconds in milliseconds
 
 // --- Timing ---
@@ -170,10 +166,10 @@ void setup() {
   }
 
   // --- Connect to primary or secondary WiFi
-  connectToWiFi(ssid1, password1);
+  connectToWiFi(WiFi_SSID_1, WiFi_PWD_1);
 
   if (WiFi.status() != WL_CONNECTED) {
-    connectToWiFi(ssid2, password2);
+    connectToWiFi(WiFi_SSID_2, WiFi_PWD_2);
   }
 
   if (WiFi.status() != WL_CONNECTED) {
