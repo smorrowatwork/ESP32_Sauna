@@ -446,6 +446,10 @@ void handleRoot() {
           if (saunaOn && remainingSeconds > 0) {
             remainingSeconds--;
             updateTimeDisplay();
+            if (remainingSeconds == 0){
+              // Pre-emptively set the state to 'Off' but use an asterisk to indicate "unofficial"
+              document.getElementById('state').textContent = 'Off*';
+            }
           }
         }, 1000);
 
