@@ -18,9 +18,9 @@
 //          √ Add some CSS and pretty up the style of the website
 //          * Ensure that adding 15 minutes from the web interface never takes us over
 //                90 minutes.  If adding 15 goes over 90 it should just set it to 90.
-//          * Implement client code that enable/disables start and stop buttons based on
+//          √ Implement client code that enable/disables start and stop buttons based on
 //                the current sauna status.
-//          * Implement client and server code to not allow (disable) adding 15 minutes
+//          √ Implement client and server code to not allow (disable) adding 15 minutes
 //                when the sauna is off     
 
 // === PINS ===
@@ -395,6 +395,11 @@ void handleRoot() {
         button:hover {
           background: #005fcc;
         }
+        button:disabled {
+          background: #ccc;
+          cursor: now-allowed;
+          box-shadow: none;
+        }
       </style>
     </head>
     <body>
@@ -404,9 +409,9 @@ void handleRoot() {
         <p>Time Remaining: <span id="time">--</span> min</p>
         <p>Status: <span id="state">--</span></p>
       </div>
-      <button onclick="sendCommand('/on')">Turn ON</button>
-      <button onclick="sendCommand('/off')">Turn OFF</button>
-      <button onclick="sendCommand('/addtime')">Add 15 min</button>
+      <button id="onBtn" onclick="sendCommand('/on')">Turn ON</button>
+      <button id="offBtn" onclick="sendCommand('/off')">Turn OFF</button>
+      <button id="addBtn" onclick="sendCommand('/addtime')">Add 15 min</button>
 
       <script>
         let remainingSeconds = 0;
@@ -423,6 +428,11 @@ void handleRoot() {
 
               saunaOn = data.state === true || data.state === "On";
               document.getElementById('state').textContent = saunaOn ? 'On' : 'Off';
+
+              // Enable/disable buttons
+              document.getElementById('onBtn').disabled = saunaOn;
+              document.getElementById('offBtn').disabled = !saunaOn;
+              document.getElementById('addBtn').disabled = !saunaOn;
 
               if (saunaOn){
                 const [mm,ss] = data.time.split(':').map(Number);
