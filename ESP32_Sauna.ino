@@ -144,7 +144,7 @@ void showIP() {
 }
 
 void setup() {
-  // --- Initialize sensors, lct, and encoder
+  // --- Initialize sensors, lcd, and encoder
   Serial.begin(115200);
   delay(1000); // give time for Serial
 
@@ -166,10 +166,10 @@ void setup() {
   }
 
   // --- Connect to primary or secondary WiFi
-  connectToWiFi(WiFi_SSID_1, WiFi_PWD_1);
+  connectToWiFi(WIFI_SSID_1, WIFI_PWD_1);
 
   if (WiFi.status() != WL_CONNECTED) {
-    connectToWiFi(WiFi_SSID_2, WiFi_PWD_2);
+    connectToWiFi(WIFI_SSID_2, WIFI_PWD_2);
   }
 
   if (WiFi.status() != WL_CONNECTED) {
@@ -221,9 +221,9 @@ void loop() {
         Serial.println("positive");
         setMinutes = 0;
       }
-      Serial.print(MAX_TIME);
-      Serial.println(" max");
-      Serial.println(setMinutes);
+      //Serial.print(MAX_TIME);
+      //Serial.println(" max");
+      //Serial.println(setMinutes);
       if (setMinutes < 0) {
         Serial.println("negative");
         setMinutes = MAX_TIME;
