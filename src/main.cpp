@@ -271,10 +271,15 @@ void handleRoot() {
       </div>
       <button id="onBtn" onclick="sendCommand('/on')">Turn ON</button>
       <button id="offBtn" onclick="sendCommand('/off')">Turn OFF</button>
-      <button id="addBtn" onclick="sendCommand('/addtime')">Add 15 min</button>
+      <!--<button id="addBtn" onclick="sendCommand('/addtime')">Add 15 min</button>-->
+      <button id="addBtn" onclick="addTimeCommand()">Add 15 min</button>
 
       <script>
         let remainingSeconds = 0;
+
+        function addTimeCommand() {
+          fetch('/addtime').then(() => setTimeout(() => {updateStatus();},500));
+        }
 
         function sendCommand(endpoint) {
           fetch(endpoint).then(() => updateStatus());
@@ -354,14 +359,11 @@ void handleOff() {
 }
 
 void handleAddTime() {
-  // TODO:  get timeRemaining from countdownMillis and targetTime
-  //        then re-implement to add 15 minutes to the timer.
-  // if (saunaOn && timeRemaining <= MAX_TIME - 15 * 60) {
-  //   timeRemaining += 15 * 60;
-  // }
-  // server.send(200, "text/plain", "OK");
-  delay(2);   // Dummy code for stubbed method, remove when implemented
-  server.send(200, "text/plain", "OK"); // Dummy code for stubbed method, remove when implemented
+  unsigned long now = millis();                                       // Get the current time
+  unsigned long addMillis = 15 * 60000UL;                             // 15 minutes to add
+  countdownMillis = constrain((countdownMillis + addMillis), 0UL, (90 * 60000UL));  // Constrain to max of 90 minutes
+  targetTime = now + countdownMillis;                                 // Update target end time
+  server.send(200, "text/plain", "OK");                               // Respond to browser
 }
 
 void handleStatus() {
