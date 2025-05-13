@@ -16,7 +16,7 @@
 //                get a starting value from the status call and re-sync the countdown
 //                but implement the countdown logic on the web client.
 //          √ Add some CSS and pretty up the style of the website
-//          * Ensure that adding 15 minutes from the web interface never takes us over
+//          √ Ensure that adding 15 minutes from the web interface never takes us over
 //                90 minutes.  If adding 15 goes over 90 it should just set it to 90.
 //          √ Implement client code that enable/disables start and stop buttons based on
 //                the current sauna status.
