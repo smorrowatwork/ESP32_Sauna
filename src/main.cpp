@@ -6,6 +6,7 @@
 #include <WebServer.h>
 #include <ESP32Encoder.h>
 #include <secrets.h>
+#include <HTTPClient.h>
 
 // Author:  Steven Morrow & Patrick Morrow
 // Date:    05/11/2025
@@ -21,7 +22,9 @@
 //          √ Implement client code that enable/disables start and stop buttons based on
 //                the current sauna status.
 //          √ Implement client and server code to not allow (disable) adding 15 minutes
-//                when the sauna is off     
+//                when the sauna is off
+//          √ Implement Discord webhook call to send a message when sauna is on, off, and
+//                when it reaches a temperature of 225F      
 
 // === PINS ===
 #define SSR_PIN 25
@@ -74,6 +77,7 @@ bool lastButtonState = HIGH;
 
 // === STATE ===
 bool saunaOn = false;
+bool lastSaunaState = false;
 bool isSettingTime = false;
 int setMinutes = 0;
 unsigned long countdownMillis = 0;
@@ -89,6 +93,28 @@ DeviceAddress sensorAddress;
 float currentTempF = 0.0;
 bool tempConversionInProgress = false;
 unsigned long tempRequestTime = 0;
+const float targetTempF = 125.0;        // Target temperature for discord notification
+bool targetTempOneshotSent = false;
+
+// Sends a notfication message to discord
+void sendDiscordNotification(String message) {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin(DISCORD_WEBHOOK_URL);
+    http.addHeader("Content-Type", "application/json");
+
+    String payload = "{\"content\": \"" + message + "\"}";
+    int httpResponseCode = http.POST(payload);
+
+    if (httpResponseCode > 0) {
+      Serial.println("Message sent to Discord.");
+    } else {
+      Serial.printf("Failed to send message.  HTTP error: %d\n", httpResponseCode);
+    }
+    
+    http.end();
+  }
+}
 
 // Displays the connected network
 void showIP() {
@@ -159,6 +185,13 @@ void updateStateAndDisplay() {
   lcd.print((char)223); // Degree symbol
   lcd.print("F");
 
+  if (!targetTempOneshotSent) {
+    if (currentTempF >= targetTempF) {
+      sendDiscordNotification("Sauna has reached target temp " + String(targetTempF) + " °F");
+      targetTempOneshotSent = true;
+    }
+  }
+
   // Timer display
   unsigned long secsLeft = countdownMillis / 1000;
   int mins = secsLeft / 60;
@@ -174,8 +207,13 @@ void updateStateAndDisplay() {
   lcd.setCursor(8, 0);
   lcd.print(strTimeRemaining);
 
-  // Update Sauna switch state
-  setSauna(saunaOn);
+  // Update Sauna switch state, only if changed
+  if (saunaOn != lastSaunaState) {
+    setSauna(saunaOn);
+    sendDiscordNotification(saunaOn ? "Sauna turned ON 🔥" : "Sauna turned OFF 🚫");
+    lastSaunaState = saunaOn;
+    targetTempOneshotSent = saunaOn ? false : targetTempOneshotSent;
+  }
 
   // Flame or underscore at (15, 0)
   lcd.setCursor(15, 0);
@@ -364,6 +402,9 @@ void handleAddTime() {
   countdownMillis = constrain((countdownMillis + addMillis), 0UL, (90 * 60000UL));  // Constrain to max of 90 minutes
   targetTime = now + countdownMillis;                                 // Update target end time
   server.send(200, "text/plain", "OK");                               // Respond to browser
+  unsigned long secsLeft = countdownMillis / 1000;
+  int mins = secsLeft / 60;
+  sendDiscordNotification("Time added to sauna timer: " + String(mins) + " minutes remaining.");
 }
 
 void handleStatus() {
