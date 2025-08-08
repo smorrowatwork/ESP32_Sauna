@@ -4,7 +4,7 @@ This is a simple sauna controller built off a ESP32 microcontroller and a few ba
 * ESP32 Dev board
 * Rotary encoder with pushbutton switch
 * 16x2 i2c LCD display
-* Waterproof DS18B20 temperature sensor
+* Waterproof DS18B20 temperature sensor (Output lead:red (VCC), yellow/blue(DATA) , black(GND))
 * 4.7 kΩ resistor
 * Ink Bird SSR-40 DA (3-32v DC input - 24-380VAC @ 40A output)
 
